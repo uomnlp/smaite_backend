@@ -9,7 +9,14 @@ CORS(app, support_credentials=True)
 @cross_origin(supports_credentials=True)
 def explanation():
     claim = request.args.get('claim')
-    return {"claim": claim, "explanations":CheckFact(claim)}
+    mode = request.args.get('mode')
+    if(mode == "summarize"):
+        return {"claim": claim, "explanations":CheckFact(claim, "summarize")}
+    elif(mode == "generate"):
+        return {"claim": claim, "explanations":CheckFact(claim, "generate")}
+    else:
+        return {"claim": claim, "explanations":"Invalid mode selected."}
+
 
 if(__name__ == "__main__"):
     app.run(debug=True)
