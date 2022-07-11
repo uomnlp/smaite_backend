@@ -11,9 +11,9 @@ def explanation():
     claim = request.args.get('claim')
     mode = request.args.get('mode')
     if(mode == "summarize"):
-        return {"claim": claim, "explanations":CheckFact(claim, "summarize")}
+        return {"claim": claim, "explanations":CheckFact(claim, "summarize"), "evidence": ["Evidence 1", "Evidence 2"]}
     elif(mode == "generate"):
-        return {"claim": claim, "explanations":CheckFact(claim, "generate")}
+        return {"claim": claim, "explanations":CheckFact(claim, "generate"), "evidence": ["Evidence 1", "Evidence 2"]}
     else:
         return {"claim": claim, "explanations":"Invalid mode selected."}
 
