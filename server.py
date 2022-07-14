@@ -1,16 +1,19 @@
-from flask import Flask, send_from_directory, request
+from flask import Flask, request
 from flask_cors import CORS, cross_origin
-from factchecker import CheckFact, retrieveEvidence;
+from factchecker import CheckFact, retrieveEvidence, initialiseES
 from os.path import exists
 import requests
 import zipfile
 from tqdm import tqdm
+from dotenv import load_dotenv
+import os
+load_dotenv() 
 
-if(not exists("./model/model.zip")):
-    model = requests.get('https://kant.cs.man.ac.uk/data/public/smaite/model.zip', stream=True)
+if(not exists(os.environ.get("MODEL_PATH"))):
+    model = requests.get(os.environ.get("MODEL_LINK"), stream=True)
     total = int(model.headers.get('content-length', 0))
-    with open("./model/model.zip", 'wb') as file, tqdm(
-        desc="./model/model.zip",
+    with open(os.environ.get("MODEL_PATH"), 'wb') as file, tqdm(
+        desc=os.environ.get("MODEL_PATH"),
         total=total,
         unit='iB',
         unit_scale=True,
@@ -19,11 +22,26 @@ if(not exists("./model/model.zip")):
         for data in model.iter_content(chunk_size=1024):
             size = file.write(data)
             bar.update(size)
-    with zipfile.ZipFile("./model/model.zip", 'r') as zip_ref:
-        zip_ref.extractall("./model/")
+    with zipfile.ZipFile(os.environ.get("MODEL_PATH"), 'r') as zip_ref:
+        zip_ref.extractall(os.environ.get("MODEL_EXTRACTION_PATH"))
 
+if(not exists(os.environ.get("CORPUS_PATH"))):
+    corpus = requests.get(os.environ.get("CORPUS_LINK"), stream=True)
+    total = int(corpus.headers.get('content-length', 0))
+    with open(os.environ.get("CORPUS_PATH"), 'wb') as file, tqdm(
+        desc=os.environ.get("CORPUS_PATH"),
+        total=total,
+        unit='iB',
+        unit_scale=True,
+        unit_divisor=1024,
+    ) as bar:
+        for data in corpus.iter_content(chunk_size=1024):
+            size = file.write(data)
+            bar.update(size)
 
-app = Flask(__name__, static_url_path='', static_folder='../smaite_frontend/build')
+initialiseES()
+
+app = Flask(__name__, static_url_path='', static_folder=os.environ.get("FRONTEND_PATH"))
 CORS(app, support_credentials=True)
 
 @app.route("/myapi/fact_check", methods=['GET'])
@@ -31,12 +49,10 @@ CORS(app, support_credentials=True)
 def explanation():
     claim = request.args.get('claim')
     mode = request.args.get('mode')
-    if(mode == "summarize"):
-        return {"claim": claim, "explanations":CheckFact(claim, "summarize"), "evidence": retrieveEvidence(claim)}
-    elif(mode == "generate"):
-        return {"claim": claim, "explanations":CheckFact(claim, "generate"), "evidence": retrieveEvidence(claim)}
+    if(mode == "google" or mode == "stored" ):
+        return {"claim": claim, "explanations":CheckFact(claim, mode), "evidence": retrieveEvidence(claim)}
     else:
-        return {"claim": claim, "explanations":"Invalid mode selected."}
+        return {"claim": claim, "explanations":"Invalid mode selected.", "evidence": []}
 
 
 if(__name__ == "__main__"):
