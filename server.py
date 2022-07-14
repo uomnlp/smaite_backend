@@ -1,6 +1,6 @@
 from flask import Flask, request
 from flask_cors import CORS, cross_origin
-from factchecker import CheckFact, retrieveEvidence, initialiseES
+from factchecker import CheckFact, initialiseES
 from os.path import exists
 import requests
 import zipfile
@@ -50,9 +50,9 @@ def explanation():
     claim = request.args.get('claim')
     mode = request.args.get('mode')
     if(mode == "google" or mode == "stored" ):
-        return {"claim": claim, "explanations":CheckFact(claim, mode), "evidence": retrieveEvidence(claim)}
+        return CheckFact(claim, mode)
     else:
-        return {"claim": claim, "explanations":"Invalid mode selected.", "evidence": []}
+        return {"claim": claim, "explanations":[], "evidence": [], "status": "Invalid mode selected."}
 
 
 if(__name__ == "__main__"):
