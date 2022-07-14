@@ -43,12 +43,21 @@ def CheckFact(claim, mode):
     elif(mode == "stored"):
         evidences = retrieveCorpusEvidence(claim)
 
+    finalEvidence = claim + "\n"
+    for evidence in evidences:
+        finalEvidence += evidence['title'] + "\n"
+        finalEvidence += evidence['snippet'] + "\n"
+
     explanations = []
     if(len(evidences) > 0):
         # textGenerator = pipeline("text-generation")
         # result = textGenerator(claim, max_length=30, num_return_sequences=2)
         # for element in result:
         #     explanations.append(element['generated_text'])
+        summarizer = pipeline("summarization", model=os.environ.get("EXTRACTED_MODEL_PATH"))
+        results = summarizer(finalEvidence)
+        for result in results:
+            explanations.append(result['summary_text'])
         return {"claim": claim, "explanations":explanations, "evidence": evidences, "status": "success"}
     else:
         return {"claim": claim, "explanations":[], "evidence": [], "status": "No evidence found."}
@@ -60,7 +69,7 @@ def retrieveGoogleEvidence(query):
     evidences = []
     if(int(response['searchInformation']['totalResults']) > 0):
         for item in response['items']:
-            evidences.append({'title':item['title'], 'link': item['link']})
+            evidences.append({'title':item['title'], 'link': item['link'], 'snippet':item['snippet']})
     return evidences
 
 def retrieveCorpusEvidence(query):
