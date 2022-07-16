@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, render_template
 from flask_cors import CORS, cross_origin
 # from factchecker import CheckFact, initialiseES
 from factchecker import CheckFact
@@ -55,9 +55,13 @@ def explanation():
     else:
         return {"claim": claim, "explanations":[], "evidence": [], "status": "Invalid mode selected."}
 
+# @app.route("/")
+# def homepage():
+#     return "<h1>Backend is up and running</h1>"
+
 @app.route("/")
-def homepage():
-    return "<h1>Backend is up and running</h1>"
+def hello():
+    return render_template('index.html')
 
 if(__name__ == "__main__"):
     # app.run(debug=True)
