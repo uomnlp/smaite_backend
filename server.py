@@ -45,7 +45,7 @@ if(not exists(os.environ.get("CORPUS_PATH"))):
 app = Flask(__name__, static_url_path='/', static_folder=os.environ.get("FRONTEND_PATH"))
 CORS(app, support_credentials=True)
 
-@app.route("/myapi/fact_check", methods=['GET'])
+@app.route("/fact_check", methods=['GET'])
 @cross_origin(supports_credentials=True)
 def explanation():
     claim = request.args.get('claim')
