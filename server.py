@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template
+from flask import Flask, request
 from flask_cors import CORS, cross_origin
 # from factchecker import CheckFact, initialiseES
 from factchecker import CheckFact
@@ -61,7 +61,7 @@ def explanation():
 
 @app.route("/")
 def hello():
-    return render_template('index.html')
+    return app.send_static_file('index.html')
 
 if(__name__ == "__main__"):
     # app.run(debug=True)
