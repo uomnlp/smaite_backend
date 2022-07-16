@@ -54,10 +54,10 @@ def CheckFact(claim, mode):
         # result = textGenerator(claim, max_length=30, num_return_sequences=2)
         # for element in result:
         #     explanations.append(element['generated_text'])
-        summarizer = pipeline("summarization", model=os.environ.get("EXTRACTED_MODEL_PATH"))
-        results = summarizer(finalEvidence)
-        for result in results:
-            explanations.append(result['summary_text'])
+        # summarizer = pipeline("summarization", model=os.environ.get("EXTRACTED_MODEL_PATH"))
+        # results = summarizer(finalEvidence)
+        # for result in results:
+        #     explanations.append(result['summary_text'])
         return {"claim": claim, "explanations":explanations, "evidence": evidences, "status": "success"}
     else:
         return {"claim": claim, "explanations":[], "evidence": [], "status": "No evidence found."}
