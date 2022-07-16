@@ -1,47 +1,47 @@
 from transformers import pipeline
 import requests
-from elasticsearch import Elasticsearch
+# from elasticsearch import Elasticsearch
 from dotenv import load_dotenv
 import os
 import json
 load_dotenv() 
 
-es = Elasticsearch([os.environ.get("ES_DEV_PATH")])
-def initialiseES():
-    if not es.indices.exists(index="smaite"):
-        options = {
-            "settings": {
-	        "number_of_shards": 5,
-	        "number_of_replicas": 1
-	    }}
-        es.indices.create(index = 'smaite', body = options)
-        bulk_data = []
-        with open(os.environ.get("CORPUS_PATH")) as file:
-            for line in file:
-                try:
-                    lineResults = json.loads(line.rstrip())
-                    if("results" not in lineResults):
-                        continue 
-                    if("items" not in lineResults['results']):
-                        continue 
-                    lineResults = lineResults['results']['items']
-                    for result in lineResults:
-                        if("title" not in result or "snippet" not in result or "link" not in result):
-                            continue 
-                        bulk_data.append({"index": {"_index": 'smaite'}})
-                        bulk_data.append({"title":result['title'],"snippet":result['snippet'], "link": result["link"]})
-                except:
-                    print(lineResults)
-                    break
-        es.bulk(index = 'smaite', body = bulk_data)
+# es = Elasticsearch([os.environ.get("ES_DEV_PATH")])
+# def initialiseES():
+#     if not es.indices.exists(index="smaite"):
+#         options = {
+#             "settings": {
+# 	        "number_of_shards": 5,
+# 	        "number_of_replicas": 1
+# 	    }}
+#         es.indices.create(index = 'smaite', body = options)
+#         bulk_data = []
+#         with open(os.environ.get("CORPUS_PATH")) as file:
+#             for line in file:
+#                 try:
+#                     lineResults = json.loads(line.rstrip())
+#                     if("results" not in lineResults):
+#                         continue 
+#                     if("items" not in lineResults['results']):
+#                         continue 
+#                     lineResults = lineResults['results']['items']
+#                     for result in lineResults:
+#                         if("title" not in result or "snippet" not in result or "link" not in result):
+#                             continue 
+#                         bulk_data.append({"index": {"_index": 'smaite'}})
+#                         bulk_data.append({"title":result['title'],"snippet":result['snippet'], "link": result["link"]})
+#                 except:
+#                     print(lineResults)
+#                     break
+#         es.bulk(index = 'smaite', body = bulk_data)
     
 
 def CheckFact(claim, mode):
     # Retrieve evidence
     if(mode == "google"):
         evidences = retrieveGoogleEvidence(claim)
-    elif(mode == "stored"):
-        evidences = retrieveCorpusEvidence(claim)
+    # elif(mode == "stored"):
+    #     evidences = retrieveCorpusEvidence(claim)
 
     finalEvidence = claim + "\n"
     for evidence in evidences:
@@ -72,9 +72,9 @@ def retrieveGoogleEvidence(query):
             evidences.append({'title':item['title'], 'link': item['link'], 'snippet':item['snippet']})
     return evidences
 
-def retrieveCorpusEvidence(query):
-    hits = es.search(body={"query": { "multi_match": { "query": query, "fields": ["snippet", "title"] } } }, index = 'smaite')["hits"]["hits"]
-    evidences = []
-    for hit in hits:
-        evidences.append(hit['_source'])
-    return evidences
+# def retrieveCorpusEvidence(query):
+#     hits = es.search(body={"query": { "multi_match": { "query": query, "fields": ["snippet", "title"] } } }, index = 'smaite')["hits"]["hits"]
+#     evidences = []
+#     for hit in hits:
+#         evidences.append(hit['_source'])
+#     return evidences
