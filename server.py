@@ -1,6 +1,7 @@
 from flask import Flask, request
 from flask_cors import CORS, cross_origin
-from factchecker import CheckFact, initialiseES
+# from factchecker import CheckFact, initialiseES
+from factchecker import CheckFact
 from os.path import exists
 import requests
 import zipfile
