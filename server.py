@@ -1,6 +1,6 @@
 from flask import Flask, request
 from flask_cors import CORS, cross_origin
-# from factchecker import CheckFact, initialiseES
+from factchecker import CheckFact, initialiseES
 from factchecker import CheckFact
 from os.path import exists
 import requests
@@ -40,7 +40,7 @@ if(not exists(os.environ.get("CORPUS_PATH"))):
             size = file.write(data)
             bar.update(size)
 
-# initialiseES()
+initialiseES()
 
 app = Flask(__name__, static_url_path='/', static_folder=os.environ.get("FRONTEND_PATH"))
 CORS(app, support_credentials=True)
@@ -55,14 +55,9 @@ def explanation():
     else:
         return {"claim": claim, "explanations":[], "evidence": [], "status": "Invalid mode selected."}
 
-# @app.route("/")
-# def homepage():
-#     return "<h1>Backend is up and running</h1>"
-
 @app.route("/")
 def hello():
     return app.send_static_file('index.html')
 
 if(__name__ == "__main__"):
-    # app.run(debug=True)
     app.run(host="0.0.0.0")
