@@ -3,11 +3,12 @@
 # platform: osx-64
 args=0.1.0=pypi_0
 autopep8=1.6.0=pyhd3eb1b0_1
+beautifulsoup4=4.11.1=py310hecd8cb5_0
 blas=1.0=mkl
 brotlipy=0.7.0=py310hca72f7f_1002
 bzip2=1.0.8=h1de35cc_0
-ca-certificates=2022.4.26=hecd8cb5_0
-certifi=2022.6.15=py310hecd8cb5_0
+ca-certificates=2022.6.15=h033912b_0
+certifi=2022.6.15=py310h2ec42d9_0
 cffi=1.15.0=py310hc55c11b_1
 charset-normalizer=2.0.4=pyhd3eb1b0_0
 click=8.0.4=py310hecd8cb5_0
@@ -38,7 +39,7 @@ ninja=1.10.2=hecd8cb5_5
 ninja-base=1.10.2=haf03e11_5
 numpy=1.22.3=py310hdcd3fac_0
 numpy-base=1.22.3=py310hfd2de13_0
-openssl=1.1.1q=hca72f7f_0
+openssl=1.1.1q=hfe4f2af_0
 packaging=21.3=pyhd3eb1b0_0
 pip=21.2.4=py310hecd8cb5_0
 pycodestyle=2.8.0=pyhd3eb1b0_0
@@ -48,6 +49,7 @@ pyparsing=3.0.4=pyhd3eb1b0_0
 pysocks=1.7.1=py310hecd8cb5_0
 python=3.10.4=hdfd78df_0
 python-dotenv=0.20.0=pypi_0
+python-levenshtein=0.12.2=py310h1961e1f_2
 python_abi=3.10=2_cp310
 pytorch=1.10.2=cpu_py310h30e64cd_0
 pyyaml=6.0=pypi_0
@@ -57,6 +59,7 @@ requests=2.28.0=py310hecd8cb5_0
 sacremoses=master=py_0
 setuptools=61.2.0=py310hecd8cb5_0
 six=1.16.0=pyhd3eb1b0_1
+soupsieve=2.3.1=pyhd3eb1b0_0
 sqlite=3.38.5=h707629a_0
 tk=8.6.12=h5d9f67b_0
 tokenizers=0.11.4=py310h8776b5c_1
