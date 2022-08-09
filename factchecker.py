@@ -6,7 +6,7 @@ import os
 import json
 load_dotenv() 
 
-es = Elasticsearch([os.environ.get("ES_DEV_PATH")])
+es = Elasticsearch([os.environ.get("ES_PATH")])
 def initialiseES():
     if not es.indices.exists(index="smaite"):
         options = {
