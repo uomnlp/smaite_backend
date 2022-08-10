@@ -6,7 +6,7 @@ import os
 import json
 load_dotenv() 
 
-es = Elasticsearch([os.environ.get("ES_PATH")])
+es = Elasticsearch([os.environ.get("ES_PATH")],timeout=30)
 def initialiseES():
     if not es.indices.exists(index="smaite"):
         options = {
@@ -34,6 +34,7 @@ def initialiseES():
                     print(lineResults)
                     break
         es.bulk(index = 'smaite', body = bulk_data)
+        print("Elastic Search Indexing finished.")
     
 
 def CheckFact(claim, mode):
