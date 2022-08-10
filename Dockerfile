@@ -16,4 +16,4 @@ RUN pip install -r ./requirements.txt
 COPY .env factchecker.py  server.py ./ 
 
 EXPOSE 8000
-CMD ["gunicorn", "-b", ":8000", "server:app"]
+CMD ["gunicorn", "-b", ":8000","--timeout","120", "server:app"]
