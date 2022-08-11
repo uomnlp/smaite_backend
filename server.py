@@ -4,6 +4,7 @@ from factchecker import CheckFact, initialiseES
 from os.path import exists
 import requests
 import zipfile
+import shutil
 from tqdm import tqdm
 from dotenv import load_dotenv
 import os
@@ -30,7 +31,13 @@ if not os.path.exists(os.environ.get("MODEL_EXTRACTION_PATH")):
 if(not exists(os.environ.get("MODEL_PATH"))):
     download_file(os.environ.get("MODEL_PATH"), os.environ.get("MODEL_LINK"))
     with zipfile.ZipFile(os.environ.get("MODEL_PATH"), 'r') as zip_ref:
-        zip_ref.extractall(os.environ.get("MODEL_EXTRACTION_PATH"))
+        zip_ref.extractall(os.environ.get("MODEL_EXTRACTION_PATH")) 
+        if os.path.exists(os.path.join(os.environ.get("MODEL_EXTRACTION_PATH"), "__MACOSX/")):
+            shutil.rmtree(os.path.join(os.environ.get("MODEL_EXTRACTION_PATH"), "__MACOSX/"))
+
+        for file in os.listdir(os.environ.get("MODEL_EXTRACTION_PATH")):
+            if not file.endswith(".zip") and not file.endswith(".DS_Store") and not file.endswith(".json"):
+                os.rename(os.path.join(os.environ.get("MODEL_EXTRACTION_PATH"), file), os.environ.get("EXTRACTED_MODEL_PATH"))
 
 if(not exists(os.environ.get("CORPUS_PATH"))):
     download_file(os.environ.get("CORPUS_PATH"), os.environ.get("CORPUS_LINK"))
