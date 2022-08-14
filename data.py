@@ -7,7 +7,7 @@ load_dotenv()
 import shutil  
 import json
 from bs4 import BeautifulSoup
-from Levenshtein import distance as levenshtein_distance
+from Levenshtein import distance as levenshtein_distance, ratio as levenshtein_ratio
 import math
 from unidecode import unidecode
 from server import download_file
@@ -35,9 +35,9 @@ def filter_results(results):
         return True
     return False
 
-num_lines_input = sum(1 for line in open(os.environ.get("SCRAPED_DATA_2")))
+num_lines_input = sum(1 for line in open(os.environ.get("SCRAPED_DATA_1")))
 num_lines_output = sum(1 for line in open(os.environ.get("OUTPUT_FILE_2_NAME"), "a+"))
-with open(os.environ.get("SCRAPED_DATA_2")) as file:
+with open(os.environ.get("SCRAPED_DATA_1")) as file:
     with open(os.environ.get("OUTPUT_FILE_NAME"), 'a+', buffering=1) as output_file, open(os.environ.get("OUTPUT_FILE_2_NAME"), 'a+', buffering=1) as output_file_2:
         for count, line in enumerate(tqdm(file, total=num_lines_input, file=sys.stdout)):
             try:
@@ -58,22 +58,25 @@ with open(os.environ.get("SCRAPED_DATA_2")) as file:
                                 'title' : item['title'],
                                 'originalSnippet' : item['snippet'],
                                 'method': None,
-                                'distance': 0} 
+                                'distance': 0,
+                                'ratio': 0} 
                                 # original (distance = None)
                                 # exact (distance >= 0) - exact can be a mixture of similar and exact due to sub snippets
                                 # similarity (distance > 0)
-        
+                    tmpRatios = []
+                    
                     if(item['full_website'] == "FETCH_ERROR"):
                         finalData['snippet'] = item['snippet']
                         finalData['method'] = 'original'
                         finalData['distance'] = None
+                        finalData['ratio'] = None
                     else:                
                         soup = BeautifulSoup(item['full_website'], features="html.parser")
                         isExactMatch = False # Represents if even one sub snippet has an exact match
                         # Select the best matching <p> tags for each part of the short snippet (delineated by ...)
                         for snip in snippets:
                             # Best match <p> tag for the particular sub-snippet
-                            selectedTags = {'distance' : math.inf, 'text' : ''}
+                            selectedTags = {'distance' : math.inf, 'ratio': 0, 'text' : ''}
                             snip = unidecode(snip).strip()
                             checkSimilarity = True
 
@@ -92,39 +95,71 @@ with open(os.environ.get("SCRAPED_DATA_2")) as file:
                                     else:
                                         selectedTags['text'].append(tagText) 
                                     selectedTags['distance'] = 0
+                                    selectedTags['ratio'] = 0
                                     checkSimilarity = False
                                     isExactMatch = True
 
                                 # Calculate the levenshtein distance
                                 if(checkSimilarity):
                                     editDistance = levenshtein_distance(snip, tagText)
+                                    
                                     if(editDistance < selectedTags['distance']):
                                         selectedTags['distance'] = editDistance
                                         selectedTags['text'] = tagText
+
+                                    selectedTags['ratio'] = levenshtein_ratio(snip, tagText)
                             
                             # Append the text to the final text if similarity found
                             if(selectedTags['distance'] != math.inf and checkSimilarity):
                                 finalData['snippet'] += selectedTags['text'] + '\n '
                                 finalData['distance'] +=  selectedTags['distance']
+                                
+                                # Record the ratio for averaging later
+                                tmpRatios.append(selectedTags['ratio'])
+
+                                # Appending the output for the subsnippet ABC or XYZ in ABC..XYZ  (no append if original)
+                                refinedData.append({'link': item['link'],
+                                'snippet': selectedTags['text'] + '\n ',
+                                'title' : item['title'],
+                                'originalSnippet' : snip,
+                                'method': "similarity",
+                                'distance': selectedTags['distance'],
+                                'ratio':selectedTags['ratio']  })
                             # Append the minimum length text to the final text if exact match
                             elif(selectedTags['distance'] != math.inf):
                                 finalData['snippet'] += min(selectedTags['text'], key=len) + '\n '
+                                
+                                tmpRatios.append(1)
+
+                                # Appending the output for the subsnippet ABC or XYZ in ABC..XYZ  (no append if original)
+                                refinedData.append({'link': item['link'],
+                                'snippet': min(selectedTags['text'], key=len) + '\n ',
+                                'title' : item['title'],
+                                'originalSnippet' : snip,
+                                'method': "exact",
+                                'distance': 0,
+                                'ratio': 1})
                         # Append the text to the final text for the result only if a result found else append with original snippet
                         if(finalData['snippet'] != ""):
                             if isExactMatch:
                                 finalData['method'] = 'exact'
                             else:
                                 finalData['method'] = 'similarity'
+                            # Averaging out the ratios
+                            finalData['ratio'] = sum(tmpRatios)/len(tmpRatios)
                             refinedData.append(finalData)
                         else: 
                             # If snippet is empty, use originalSnippet instead (could happen when there is no HTML text at all)
                             finalData['snippet'] = item['snippet']
                             finalData['method'] = 'original'
                             finalData['distance'] = None
+                            finalData['ratio'] = None
                             refinedData.append(finalData)
-                    output_file.write(json.dumps(finalData))
-                    output_file.write('\n')
-                output_file_2.write(json.dumps(refinedData))
+                    # To output 1 snippet/line (not useful for training)
+                    # output_file.write(json.dumps(finalData))
+                    # output_file.write('\n')
+                lineJSON['results'] = refinedData
+                output_file_2.write(json.dumps(lineJSON))
                 output_file_2.write('\n')
             except:
                 print('Error on line #%s ' % str(count), file=sys.stderr, end='\n')
